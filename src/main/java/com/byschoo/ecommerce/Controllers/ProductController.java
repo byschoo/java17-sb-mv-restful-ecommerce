@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.byschoo.ecommerce.Controllers.Responses.SuccessResponse;
+import com.byschoo.ecommerce.DTO.ProductDTO;
 import com.byschoo.ecommerce.Entities.Category;
-import com.byschoo.ecommerce.Entities.Product;
 import com.byschoo.ecommerce.Services.Category.ICategoryService;
 import com.byschoo.ecommerce.Services.Product.IProductService;
 
@@ -29,7 +29,7 @@ public class ProductController {
 
     
     @PostMapping("/save")
-    public ResponseEntity<SuccessResponse> saveProduct(@RequestBody Product product, @RequestParam Long categoryId) {
+    public ResponseEntity<SuccessResponse> saveProduct(@RequestBody ProductDTO productDTO, @RequestParam Long categoryId) {
         // Verificar si la categoría con el ID proporcionado existe
         Category category = categoryService.findCategoryById(categoryId);
         
@@ -37,14 +37,14 @@ public class ProductController {
         return new ResponseEntity<>(
                 SuccessResponse.builder()
                     .mensaje("Product saved successfully")
-                    .object(productService.saveCategory(product, category))
+                    .object(productService.saveProduct(productDTO, category))
                     .dateTime(LocalDateTime.now())
                     .build(),
                 HttpStatus.CREATED);
     }
 
     @PostMapping("/update")
-    public ResponseEntity<SuccessResponse> updateProduct(@RequestBody Product product, @RequestParam Long categoryId) {
+    public ResponseEntity<SuccessResponse> updateProduct(@RequestBody ProductDTO productDTO, @RequestParam Long categoryId) {
         // Verificar si la categoría con el ID proporcionado existe
         Category category = categoryService.findCategoryById(categoryId);
         
@@ -52,7 +52,7 @@ public class ProductController {
         return new ResponseEntity<>(
                 SuccessResponse.builder()
                     .mensaje("Product updated successfully")
-                    .object(productService.updateCategory(product, category))
+                    .object(productService.updateProduct(productDTO, category))
                     .dateTime(LocalDateTime.now())
                     .build(),
                 HttpStatus.CREATED);

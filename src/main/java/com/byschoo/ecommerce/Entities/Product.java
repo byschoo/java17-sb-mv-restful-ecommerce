@@ -50,7 +50,6 @@ public class Product implements Serializable{
     @Builder.Default
     private Boolean isDisabled = false;
 
-
     @JsonIgnore // Evita que el campo category sea serializado en la respuesta JSON. Si no se ignorara, se produciría un bucle infinito
     @ManyToOne(fetch = FetchType.LAZY, optional = false) // Define la relación muchos a uno con la entidad Category. FetchType.LAZY indica que la carga de la entidad relacionada se realiza de forma diferida (EAGER es automática, Esto puede ser costoso en términos de rendimiento). optional = false indica que la relación es obligatoria
     @JoinColumn(name = "category_id", nullable = false) // Product tendrá una columna category_id que actúa como clave foránea hacia la tabla Category. nullable = false indica que la relación es obligatoria
