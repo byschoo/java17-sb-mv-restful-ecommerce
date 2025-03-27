@@ -11,5 +11,6 @@ import com.byschoo.ecommerce.Entities.Product;
 @Repository
 public interface IProductRepository extends JpaRepository<Product, Long> {
     List<Product> findAllByCategory(Category category);
+    // Product findByProductName(String productName);
 
 }

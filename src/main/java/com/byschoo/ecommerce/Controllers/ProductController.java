@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.byschoo.ecommerce.Controllers.Responses.SuccessResponse;
+import com.byschoo.ecommerce.DTO.CategoryDTO;
 import com.byschoo.ecommerce.DTO.ProductDTO;
-import com.byschoo.ecommerce.Entities.Category;
 import com.byschoo.ecommerce.Services.Category.ICategoryService;
 import com.byschoo.ecommerce.Services.Product.IProductService;
 
@@ -31,13 +31,13 @@ public class ProductController {
     @PostMapping("/save")
     public ResponseEntity<SuccessResponse> saveProduct(@RequestBody ProductDTO productDTO, @RequestParam Long categoryId) {
         // Verificar si la categoría con el ID proporcionado existe
-        Category category = categoryService.findCategoryById(categoryId);
+        CategoryDTO categoryDTO = categoryService.findCategoryById(categoryId);
         
         // Guardar el producto
         return new ResponseEntity<>(
                 SuccessResponse.builder()
                     .mensaje("Product saved successfully")
-                    .object(productService.saveProduct(productDTO, category))
+                    .object(productService.saveProduct(productDTO, categoryDTO))
                     .dateTime(LocalDateTime.now())
                     .build(),
                 HttpStatus.CREATED);
@@ -46,13 +46,13 @@ public class ProductController {
     @PostMapping("/update")
     public ResponseEntity<SuccessResponse> updateProduct(@RequestBody ProductDTO productDTO, @RequestParam Long categoryId) {
         // Verificar si la categoría con el ID proporcionado existe
-        Category category = categoryService.findCategoryById(categoryId);
+        CategoryDTO categoryDTO = categoryService.findCategoryById(categoryId);
         
         // Actualizar el producto
         return new ResponseEntity<>(
                 SuccessResponse.builder()
                     .mensaje("Product updated successfully")
-                    .object(productService.updateProduct(productDTO, category))
+                    .object(productService.updateProduct(productDTO, categoryDTO))
                     .dateTime(LocalDateTime.now())
                     .build(),
                 HttpStatus.CREATED);
@@ -72,12 +72,13 @@ public class ProductController {
     @GetMapping("/byCategory")
     public ResponseEntity<SuccessResponse> getAllProductsByCategory(@RequestParam Long categoryId) {
         // Verificar si la categoría con el ID proporcionado existe
-        Category category = categoryService.findCategoryById(categoryId);
-        
+        CategoryDTO categoryDTO = categoryService.findCategoryById(categoryId);
+    
+        // Obtener los productos por categoría
         return new ResponseEntity<>(
                 SuccessResponse.builder()
                     .mensaje("All products by category")
-                    .object(productService.findAllByCategory(category))
+                    .object(productService.findAllByCategory(categoryDTO))
                     .dateTime(LocalDateTime.now())
                     .build(),
                 HttpStatus.OK);

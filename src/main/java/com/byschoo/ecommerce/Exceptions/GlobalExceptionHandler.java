@@ -11,6 +11,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -216,22 +217,22 @@ public class GlobalExceptionHandler {
     }
 
     
-    // @ExceptionHandler(org.modelmapper.MappingException.class)
-    // public ResponseEntity<MessageResponseError> handleMappingException(org.modelmapper.MappingException ex, WebRequest webRequest) {
-    //     log.error("Exception Occured: " + ex.getClass().getSimpleName() + " - " + ex.getMessage(), ex);
+    @ExceptionHandler(JpaSystemException.class)
+    public ResponseEntity<ExceptionResponse> handleJpaSystemException(JpaSystemException ex, WebRequest webRequest) {
+        log.error("Exception Occured: " + ex.getClass().getSimpleName() + " - " + ex.getMessage(), ex);
 
-    //     return new ResponseEntity<>(
-    //         MessageResponseError.builder()
-    //             .message(ex.getMessage())
-    //             .code("Exc-500-01")
-    //             .object(ex.getClass().getSimpleName()) // Opcional: Puedes incluir detalles adicionales en el objeto
-    //             .severity("ERROR")
-    //             .url(webRequest.getDescription(false).replace("uri=", "")) // Asigna la URL
-    //             .dateTime(LocalDateTime.now())
-    //             .build(),
-    //         HttpStatus.INTERNAL_SERVER_ERROR // Devuelve 500 Internal Server Error. Se utiliza para capturar cualquier excepción no manejada específicamente.
-    //     );
-    // }
+        return new ResponseEntity<>(
+            ExceptionResponse.builder()
+                .message(ex.getMessage())
+                .code("Exc-500-01")
+                .object(ex.getClass().getSimpleName()) // Opcional: Puedes incluir detalles adicionales en el objeto
+                .severity("ERROR")
+                .url(webRequest.getDescription(false).replace("uri=", "")) // Asigna la URL
+                .dateTime(LocalDateTime.now())
+                .build(),
+            HttpStatus.INTERNAL_SERVER_ERROR // Devuelve 500 Internal Server Error. Se utiliza para capturar cualquier excepción no manejada específicamente.
+        );
+    }
 
 
     @ExceptionHandler({Exception.class, RuntimeException.class})

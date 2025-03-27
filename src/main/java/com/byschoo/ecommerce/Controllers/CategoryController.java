@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.byschoo.ecommerce.Controllers.Responses.SuccessResponse;
+import com.byschoo.ecommerce.DTO.CategoryDTO;
 import com.byschoo.ecommerce.Entities.Category;
 import com.byschoo.ecommerce.Services.Category.ICategoryService;
 
@@ -31,15 +32,6 @@ public class CategoryController {
 
     @PostMapping("/save")
     public ResponseEntity<SuccessResponse> saveCategory(@RequestBody Category category) {
-        if (categoryService.existsByCategoryName(category.getCategoryName())) {
-            return new ResponseEntity<>(
-                SuccessResponse.builder()
-                    .mensaje("Category already exists")
-                    .dateTime(LocalDateTime.now())
-                    .build(),
-                HttpStatus.CONFLICT
-            );
-        }
         return new ResponseEntity<>(
             SuccessResponse.builder()
                 .mensaje("Category saved successfully")
@@ -51,27 +43,11 @@ public class CategoryController {
     }
 
     @PostMapping("/update")
-    public ResponseEntity<SuccessResponse> updateCategory(@RequestBody Category category) {
-        // Verificar si la categoría con el ID proporcionado existe
-        Category existingCategory = categoryService.findCategoryById(category.getId());
-    
-        // Verificar si el nuevo nombre ya existe en otra categoría
-        if (!categoryService.existsByCategoryNameAndIdNot(category.getCategoryName(), category.getId())) {
-            
-            // Actualizar los datos de la categoría existente
-            existingCategory.setCategoryName(category.getCategoryName());
-            existingCategory.setDescription(category.getDescription());
-            existingCategory.setImageUrl(category.getImageUrl());
-            existingCategory.setIsDisabled(category.getIsDisabled());
-        }
-
-        // Guardar los cambios
-        Category updatedCategory = categoryService.updateCategory(existingCategory);    
-    
+    public ResponseEntity<SuccessResponse> updateCategory(@RequestBody CategoryDTO categoryDTO) {    
         return new ResponseEntity<>(
             SuccessResponse.builder()
                 .mensaje("Category updated successfully")
-                .object(updatedCategory)
+                .object(saveCategory(categoryService.updateCategory(categoryDTO)))
                 .dateTime(LocalDateTime.now())
                 .build(),
             HttpStatus.CREATED
@@ -105,10 +81,10 @@ public class CategoryController {
     @GetMapping("/findAllEnabledCategories")
     public ResponseEntity<Map<String, Object>> findAllEnabledCategories(@RequestParam(defaultValue = "false") Boolean isDisabled) {
         // Obtener todas las categorías habilitadas desde el servicio
-        List<Category> categories = categoryService.findAllByIsDisabled(isDisabled);
+        List<CategoryDTO> categoriesDTO = categoryService.findAllByIsDisabled(isDisabled);
     
         // Envolver cada categoría en un Map con la clave "category"
-        List<Map<String, Object>> wrappedCategories = categories.stream()
+        List<Map<String, Object>> wrappedCategories = categoriesDTO.stream()
             .map(category -> Map.<String, Object>of("category", category)) // Especificar explícitamente el tipo del Map
             .toList();
     
@@ -122,23 +98,31 @@ public class CategoryController {
     }
 
     @GetMapping("/findAllDisabledCategories")
-    public ResponseEntity<SuccessResponse> findAllDisabledCategories(@RequestParam(defaultValue = "true") Boolean isDisabled) {
-        return new ResponseEntity<>(
-            SuccessResponse.builder()
-                .mensaje("Categories retrieved successfully")
-                .object(categoryService.findAllByIsDisabled(isDisabled))
-                .dateTime(LocalDateTime.now())
-                .build(),
-            HttpStatus.OK
-        );
+    public ResponseEntity<Map<String, Object>> findAllDisabledCategories(@RequestParam(defaultValue = "true") Boolean isDisabled) {
+        // Obtener todas las categorías habilitadas desde el servicio
+        List<CategoryDTO> categoriesDTO = categoryService.findAllByIsDisabled(isDisabled);
+    
+        // Envolver cada categoría en un Map con la clave "category"
+        List<Map<String, Object>> wrappedCategories = categoriesDTO.stream()
+            .map(category -> Map.<String, Object>of("category", category)) // Especificar explícitamente el tipo del Map
+            .toList();
+    
+        // Construir la respuesta
+        Map<String, Object> response = new HashMap<>();
+        response.put("mensaje", "Categories retrieved successfully");
+        response.put("category", wrappedCategories);
+        response.put("dateTime", LocalDateTime.now());
+    
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/findById")
     public ResponseEntity<SuccessResponse> findCategoryById(@RequestParam Long id) {
+        CategoryDTO categoryDTO = categoryService.findCategoryById(id);
         return new ResponseEntity<>(
             SuccessResponse.builder()
                 .mensaje("Category retrieved successfully")
-                .object(categoryService.findCategoryById(id))
+                .object(categoryDTO)
                 .dateTime(LocalDateTime.now())
                 .build(),
             HttpStatus.OK
@@ -147,10 +131,11 @@ public class CategoryController {
 
     @GetMapping("/findByName")
     public ResponseEntity<SuccessResponse> findByCategoryName(@RequestParam String categoryName) {
+        CategoryDTO categoryDTO = categoryService.findByCategoryName(categoryName);
         return new ResponseEntity<>(
             SuccessResponse.builder()
                 .mensaje("Category retrieved successfully")
-                .object(categoryService.findByCategoryName(categoryName))
+                .object(categoryDTO)
                 .dateTime(LocalDateTime.now())
                 .build(),
             HttpStatus.OK

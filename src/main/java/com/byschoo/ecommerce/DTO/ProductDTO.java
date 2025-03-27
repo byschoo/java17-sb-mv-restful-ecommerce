@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProductDTO implements Serializable{
+    @NotBlank(message = "El identificador del producto es obligatorio")
     private Long id;
 
     @NotBlank(message = "El nombre es obligatorio")

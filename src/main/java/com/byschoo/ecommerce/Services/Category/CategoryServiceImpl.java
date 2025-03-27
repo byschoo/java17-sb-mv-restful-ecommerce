@@ -1,10 +1,13 @@
 package com.byschoo.ecommerce.Services.Category;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import com.byschoo.ecommerce.DTO.CategoryDTO;
 import com.byschoo.ecommerce.Entities.Category;
 import com.byschoo.ecommerce.Exceptions.Custom.ResourceNotFoundException;
 import com.byschoo.ecommerce.Exceptions.Custom.ResourceAlreadyExistsException;
@@ -17,15 +20,48 @@ import lombok.RequiredArgsConstructor;
 public class CategoryServiceImpl implements ICategoryService {
 
     private final ICategoryRepository categoryRepository;
+    private final ModelMapper modelMapper;
 
     @Override
     public Category saveCategory(Category category) {
+        // Verificar si la categoría ya existe
+        if (categoryRepository.existsByCategoryName(category.getCategoryName())) {
+            throw new ResourceAlreadyExistsException(
+                "Category already exists",
+                "Exc-409-01",
+                HttpStatus.CONFLICT
+            );
+        }
         return categoryRepository.save(category);
+        
     }
 
     @Override
-    public Category updateCategory(Category category) {
-        return categoryRepository.save(category);
+    public Category updateCategory(CategoryDTO categoryDTO) {        
+        // Verificar si la categoría con el ID proporcionado existe
+        Category existingCategory = categoryRepository.findById(categoryDTO.getId()).orElseThrow(
+            () -> new ResourceNotFoundException(
+                String.format("Category with ID %d not found in the database", categoryDTO.getId()), 
+                "Exc-4006", 
+                HttpStatus.NOT_FOUND
+            )
+        );
+    
+        // Verificar si el nuevo nombre ya existe en otra categoría
+        if (categoryRepository.existsByCategoryNameAndIdNot(categoryDTO.getCategoryName(), categoryDTO.getId())) {
+            throw new ResourceAlreadyExistsException(
+                "Category with the same name already exists",
+                "Exc-409-01",
+                HttpStatus.CONFLICT
+            );
+        }
+
+        // Actualizar los atributos de la categoría uno por uno
+        existingCategory.setCategoryName(categoryDTO.getCategoryName());
+        existingCategory.setDescription(categoryDTO.getDescription());
+    
+        // Guardar la categoría actualizada
+        return categoryRepository.save(existingCategory);
     }
 
     @Override
@@ -57,27 +93,32 @@ public class CategoryServiceImpl implements ICategoryService {
     }
 
     @Override
-    public Category findCategoryById(Long id) {
-        return categoryRepository.findById(id).orElseThrow(
+    public CategoryDTO findCategoryById(Long id) {
+        // Buscar la categoría en la base de datos
+        Category category = categoryRepository.findById(id).orElseThrow(
             () -> new ResourceNotFoundException(
                 String.format("Category with ID %d not found in the database", id), 
                 "Exc-4006", 
                 HttpStatus.NOT_FOUND
             )
         );
+    
+        // Mapear la categoría a CategoryDTO
+        return modelMapper.map(category, CategoryDTO.class);
     }
 
     @Override
-    public Category findByCategoryName(String categoryName) {
-        if(existsByCategoryName(categoryName)) {
-            return categoryRepository.findByCategoryName(categoryName).get();
-        } else {
-            throw new ResourceNotFoundException(
-                String.format("Category with name %s not found in the database", categoryName), 
-                "Exc-4006", 
+    public CategoryDTO findByCategoryName(String categoryName) {
+        // Verificar si la categoría existe
+        Category category = categoryRepository.findByCategoryName(categoryName)
+            .orElseThrow(() -> new ResourceNotFoundException(
+                String.format("Category with name: '%s', not found in the database", categoryName),
+                "Exc-4006",
                 HttpStatus.NOT_FOUND
-            );
-        }
+            ));
+    
+        // Mapear la categoría a CategoryDTO
+        return modelMapper.map(category, CategoryDTO.class);
     }
 
     @Override
@@ -99,8 +140,10 @@ public class CategoryServiceImpl implements ICategoryService {
     }
 
     @Override
-    public List<Category> findAllByIsDisabled(Boolean isDisabled) {
-        return categoryRepository.findAllByIsDisabled(isDisabled);
+    public List<CategoryDTO> findAllByIsDisabled(Boolean isDisabled) {
+        return categoryRepository.findAllByIsDisabled(isDisabled).stream()
+            .map(category -> modelMapper.map(category, CategoryDTO.class)) // Cambiar a CategoryDTO
+            .collect(Collectors.toList());
     }
 
 }

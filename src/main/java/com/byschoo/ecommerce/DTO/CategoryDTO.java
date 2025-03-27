@@ -20,6 +20,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class CategoryDTO implements Serializable{
+    @NotBlank(message = "El identificador de la categoría es obligatorio")
     private Long id;
 
     @NotBlank(message = "El nombre de la categoría es obligatorio")
@@ -38,4 +39,5 @@ public class CategoryDTO implements Serializable{
     @JsonProperty("products")
     @Builder.Default
     private List<Product> products = new ArrayList<>();
+
 }
