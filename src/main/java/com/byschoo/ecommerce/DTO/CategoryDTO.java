@@ -8,6 +8,7 @@ import com.byschoo.ecommerce.Entities.Product;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -20,7 +21,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class CategoryDTO implements Serializable{
-    @NotBlank(message = "El identificador de la categoría es obligatorio")
+    @NotNull(message = "El identificador de la categoría es obligatorio")
     private Long id;
 
     @NotBlank(message = "El nombre de la categoría es obligatorio")

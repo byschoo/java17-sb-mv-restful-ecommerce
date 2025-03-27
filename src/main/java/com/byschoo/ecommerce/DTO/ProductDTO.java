@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -16,7 +17,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProductDTO implements Serializable{
-    @NotBlank(message = "El identificador del producto es obligatorio")
+    @NotNull(message = "El identificador del producto es obligatorio")
     private Long id;
 
     @NotBlank(message = "El nombre es obligatorio")
@@ -31,14 +32,14 @@ public class ProductDTO implements Serializable{
     @NotBlank(message = "La URL de la imagen es obligatoria")
     private String imageUrl;
 
-    @NotBlank(message = "El precio es obligatorio")
+    @NotNull(message = "El precio es obligatorio")
     @Min(value = 0, message = "El precio del producto debe ser mayor o igual a 0")
     private Double price;
 
-    @NotBlank(message = "El stock es obligatorio")
+    @NotNull(message = "El stock es obligatorio")
     @Min(value = 0, message = "El stock del producto debe ser mayor o igual a 0")
     private Integer stock;
 
-    @NotBlank(message = "La categoría es obligatoria")
+    @NotNull(message = "La categoría es obligatoria")
     private Long categoryId; // Identificador de la categoría asociada al producto
 }

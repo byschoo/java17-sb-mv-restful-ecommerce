@@ -58,6 +58,4 @@ public class Product implements Serializable{
     // private Date createdAt;
     // private Date updatedAt;
     // private Date deletedAt;
-    // private Category category;
-
 }
